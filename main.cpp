@@ -23,7 +23,8 @@ struct ttt{
 
     vector<vector<char>> mat;
     char currentPlayer;
-    char winner;
+    char winner;                // 'X' or 'O' or ' ' or 'D' (Draw)
+    uint8_t movesPlayed;
 
     /*
         Coordinates for the board:
@@ -36,6 +37,7 @@ struct ttt{
         mat = vector<vector<char>>(3, vector<char>(3, ' '));
         winner = ' ';
         currentPlayer = ' ';
+        movesPlayed = 0;
     }
 
     void print(){
@@ -88,21 +90,39 @@ struct ttt{
                 return true;
             }
         }
+
+        if(mat[0][0] == player && mat[1][1] == player && mat[2][2] == player){
+            winner = player;
+            return true;
+        }
+
+        if(mat[0][2] == player && mat[1][1] == player && mat[2][0] == player){
+            winner = player;
+            return true;
+        }
+
+        // check if there is a draw
+        if(movesPlayed == 9){winner = 'D';}
+
         return false;
     }
 
     void play(int coord, char player){
         int x = (coord - 1) / 3;
         int y = (coord - 1) % 3;
-        if(isValidMove(x, y)){mat[x][y] = player;}
-        else{cout << "Invalid move" << endl;}
+        if(isValidMove(x, y)){
+            mat[x][y] = player;
+            movesPlayed++;
+        }
+        else{cout << RED << "Invalid move" << RESET << endl;}
     }
 
     void startGame(char starter){
         this->currentPlayer = starter;
         int x, y;
         while(true){
-            print();
+            print(0);
+            cout << endl;
             cout << "Player " << currentPlayer << " turn" << endl;
             cout << "Enter Coord: ";
             int coord;
@@ -110,9 +130,10 @@ struct ttt{
             play(coord, currentPlayer);
             if(isWinner(currentPlayer)){
                 print();
-                cout << "Player " << currentPlayer << " wins!" << endl;
+                cout << YELLOW << "Player " << currentPlayer << " wins!" << RESET << endl;
                 break;
             }
+            if(movesPlayed == 9){winner = 'D';}
             currentPlayer = currentPlayer == 'X' ? 'O' : 'X';
         }
     }
@@ -123,9 +144,13 @@ struct super{
 
     vector<vector<ttt>> mat;
     char currentPlayer;
+    char winner;                // 'X' or 'O' or ' ' or 'D' (Draw)
+    uint8_t gamesDone;
 
     super(){
         mat = vector<vector<ttt>>(3, vector<ttt>(3));
+        winner = ' ';
+        gamesDone = 0;
     }
 
     /*
@@ -163,11 +188,11 @@ struct super{
     }
 
     void printR(){
-        for(int i = 0; i < 3; i++){
-            for(int j = 0; j < 3; j++){
-                mat[i][j].print(7*i);
-                cout << endl;
+        for(int i=0; i < 3; i++){
+            for(int j=0; j < 3; j++){
+                mat[i][j].print(j*15);
             }
+            cout << endl;
         }
     }
 
@@ -221,41 +246,70 @@ struct super{
         printTemplate();
         cout << "First player is " << currentPlayer << endl;
 
-        // First player can play wherever they want
-        int boardNum;
-        do{
-            cout << "Enter board number between 1-9: ";
-            cin >> boardNum;
-        }while(boardNum < 1 || boardNum > 9);
-        prevMove = boardNum;
-        int coord;
-        do{
-            cout << "Enter Coordination between 1-9: ";
-            cin >> coord;
-        }while(coord < 1 || coord > 9);
-        play(boardNum, coord);
-        print();
-
         // Game loop
+        int boardNum;
         bool isGameOver = false;
+        bool isFirst = true;
+
         while(!isGameOver){
             int boardNum = prevMove;
             int coord;
             cout << "Player " << currentPlayer << " turn" << endl;
+            
+            // If board is finished then player can play anywhere or if it is the first move
+            if(mat[(boardNum-1) / 3][(boardNum-1) % 3].winner != ' ' || isFirst == true){
+                do{
+                    isFirst = false;
+                    cout << "You can play anywhere!" << endl;
+                    cout << "Enter board number between 1-9: ";
+                    cin >> boardNum;
+                }while(boardNum < 1 || boardNum > 9);
+            }
+
             do{
                 cout << "Your board is " << boardNum << endl;
                 cout << "Enter Coordination between 1-9: ";
                 cin >> coord;
             }while(coord < 1 || coord > 9);
+
             cout << "\033[2J\033[1;1H";
+
             play(boardNum, coord);
+            print();
+
             currentPlayer = currentPlayer == 'X' ? 'O' : 'X';
             prevMove = coord;
-            print();
         }
             
     }
 
+    bool isWinner(char player){
+        // check if there is a winner and set the winner
+        for(int i = 0; i < 3; i++){
+            if(mat[i][0].winner == player && mat[i][1].winner == player && mat[i][2].winner == player){
+                gamesDone++;
+                return true;
+            }
+            if(mat[0][i].winner == player && mat[1][i].winner == player && mat[2][i].winner == player){
+                gamesDone++;
+                return true;
+            }
+        }
+
+        if(mat[0][0].winner == player && mat[1][1].winner == player && mat[2][2].winner == player){
+            gamesDone++;
+            return true;
+        }
+
+        if(mat[0][2].winner == player && mat[1][1].winner == player && mat[2][0].winner == player){
+            gamesDone++;
+            return true;
+        }
+
+        if(gamesDone == 9){winner = 'D';}
+
+        return false;
+    }
 };
 
 int main() {
