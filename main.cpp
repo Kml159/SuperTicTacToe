@@ -50,30 +50,6 @@ struct ttt{
         }
     }
 
-    void print(int align){
-        if(winner == 'X'){
-            // Put big X in 3x9 grid
-            cout << setw(align) << "_  _" << endl;
-            cout << setw(align) << " \\/ " << endl;
-            cout << setw(align) << "_/\\_ " << endl;
-        }
-        else if(winner == 'O'){
-            // Put big O in 3x9 grid
-            cout << setw(align) << "  __  " << endl;
-            cout << setw(align) << " /  \\ " << endl;
-            cout << setw(align) << " \\__/ " << endl;
-        }
-        else{
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    cout << mat[i][j];
-                    if (j < 2) cout << "|";
-                }
-                cout << setw(align);
-            }
-        }
-    }
-
     bool isValidMove(int x, int y){
         if(x < 0 || x > 2 || y < 0 || y > 2 || mat[x][y] != ' '){
             cout << RED << "Invalid move" << RESET << endl;
@@ -122,8 +98,8 @@ struct ttt{
         int y = (coord - 1) % 3;
         if(isValidMove(x, y)){
             mat[x][y] = player;
-            if(isWinner(player)){winner = player;}
             movesPlayed++;
+            if(isWinner(player)){winner = player;}
         }
         else{cout << RED << "Invalid move" << RESET << endl;}
     }
@@ -132,7 +108,7 @@ struct ttt{
         this->currentPlayer = starter;
         int x, y;
         while(true){
-            print(10);
+            print();
             cout << endl;
             cout << "Player " << currentPlayer << " turn" << endl;
             cout << "Enter Coord: ";
@@ -140,7 +116,7 @@ struct ttt{
             cin >> coord;
             play(coord, currentPlayer);
             if(isWinner(currentPlayer)){
-                print(0);
+                print();
                 cout << YELLOW << "Player " << currentPlayer << " wins!" << RESET << endl;
                 break;
             }
@@ -156,12 +132,10 @@ struct super{
     vector<vector<ttt>> mat;
     char currentPlayer;
     char winner;                // 'X' or 'O' or ' ' or 'D' (Draw)
-    uint8_t gamesDone;
 
     super(){
         mat = vector<vector<ttt>>(3, vector<ttt>(3));
         winner = ' ';
-        gamesDone = 0;
     }
 
     /*
@@ -269,6 +243,31 @@ struct super{
         return false;
     }
 
+    bool checkGameOver(){
+        uint8_t gamesDone = 0;
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                if(mat[i][j].winner != ' '){gamesDone++;}
+            }
+        }
+        if(gamesDone == 9){
+            winner = 'D';
+            cout << YELLOW << "Draw!" << RESET << endl;
+            return true;
+        }
+
+        if(isWinner(currentPlayer)){
+            cout << YELLOW << "Player " << currentPlayer << " wins!" << RESET << endl;
+            return true;
+        }
+        
+        else if(winner == 'D'){
+            cout << YELLOW << "Draw!" << RESET << endl;
+            return true;
+        }
+        return false;
+    }
+
     void startGame(){
 
         // Clear the screen
@@ -288,6 +287,7 @@ struct super{
         while(!isGameOver){
             int boardNum = prevMove;
             int coord;
+
             cout << "Player " << currentPlayer << " turn" << endl;
             
             // If board is finished then player can play anywhere or if it is the first move
@@ -313,10 +313,7 @@ struct super{
             print();
 
             // Check if game ended
-            if(isWinner(currentPlayer) || winner == 'D'){
-                cout << YELLOW << "Player " << currentPlayer << " wins!" << RESET << endl;
-                isGameOver = true;
-            }
+            isGameOver = checkGameOver();
 
             currentPlayer = currentPlayer == 'X' ? 'O' : 'X';
             prevMove = coord;
@@ -328,26 +325,22 @@ struct super{
         // check if there is a winner and set the winner
         for(int i = 0; i < 3; i++){
             if(mat[i][0].winner == player && mat[i][1].winner == player && mat[i][2].winner == player){
-                gamesDone++;
                 return true;
             }
             if(mat[0][i].winner == player && mat[1][i].winner == player && mat[2][i].winner == player){
-                gamesDone++;
                 return true;
             }
         }
 
         if(mat[0][0].winner == player && mat[1][1].winner == player && mat[2][2].winner == player){
-            gamesDone++;
             return true;
         }
 
         if(mat[0][2].winner == player && mat[1][1].winner == player && mat[2][0].winner == player){
-            gamesDone++;
             return true;
         }
 
-        if(gamesDone == 9){winner = 'D';}
+        // if(gamesDone == 9){winner = 'D';}
 
         return false;
     }
