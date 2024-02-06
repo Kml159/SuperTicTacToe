@@ -64,18 +64,28 @@ struct ttt{
             cout << setw(align) << " \\__/ " << endl;
         }
         else{
-            for(int i = 0; i < 3; i++){
-                for(int j = 0; j < 3; j++){
-                    cout << setw(align) << mat[i][j];
-                    if(j < 2) cout << setw(align) << "|";
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    cout << mat[i][j];
+                    if (j < 2) cout << "|";
                 }
-                cout << setw(align) << endl;
+                cout << setw(align);
             }
         }
     }
 
     bool isValidMove(int x, int y){
-        return x >= 0 && x < 3 && y >= 0 && y < 3 && mat[x][y] == ' ';
+        if(x < 0 || x > 2 || y < 0 || y > 2 || mat[x][y] != ' '){
+            cout << RED << "Invalid move" << RESET << endl;
+            return false;
+        }
+        return true;
+    }
+
+    bool isValidMove(int place){
+        int x = (place - 1) / 3;
+        int y = (place - 1) % 3;
+        return isValidMove(x, y);
     }
 
     bool isWinner(char player){
@@ -112,6 +122,7 @@ struct ttt{
         int y = (coord - 1) % 3;
         if(isValidMove(x, y)){
             mat[x][y] = player;
+            if(isWinner(player)){winner = player;}
             movesPlayed++;
         }
         else{cout << RED << "Invalid move" << RESET << endl;}
@@ -121,7 +132,7 @@ struct ttt{
         this->currentPlayer = starter;
         int x, y;
         while(true){
-            print(0);
+            print(10);
             cout << endl;
             cout << "Player " << currentPlayer << " turn" << endl;
             cout << "Enter Coord: ";
@@ -129,7 +140,7 @@ struct ttt{
             cin >> coord;
             play(coord, currentPlayer);
             if(isWinner(currentPlayer)){
-                print();
+                print(0);
                 cout << YELLOW << "Player " << currentPlayer << " wins!" << RESET << endl;
                 break;
             }
@@ -169,28 +180,33 @@ struct super{
             |7|8|9| |7|8|9| |7|8|9|
     */
 
-   void print(){
+    void print(){
         cout << endl << endl;
         for(int i = 0; i < 3; i++){
             for(int j = 0; j < 3; j++){
                 for(int k = 0; k < 3; k++){
                     cout << "|";
                     for(int l = 0; l < 3; l++){
-                        cout << mat[i][k].mat[j][l];
+
+                        if(mat[i][k].winner == ' '){
+                            cout << BLUE << mat[i][k].mat[j][l] << RESET;
+                        }
+                        else{
+                            if(j == 1 && l == 1){
+                                cout << RED <<mat[i][k].winner << RESET;
+                            }
+                            else{
+                                cout << " ";
+                            }
+                        }
                         if(l < 2) cout << "|";
+
                     }
                     cout << "|";
                 }
-                cout << endl;
-            }
-            cout << endl;
-        }
-    }
+                
 
-    void printR(){
-        for(int i=0; i < 3; i++){
-            for(int j=0; j < 3; j++){
-                mat[i][j].print(j*15);
+                cout << endl;
             }
             cout << endl;
         }
@@ -235,6 +251,24 @@ struct super{
         }
     }
 
+    bool isValidMove(int boardNum, int coord){
+        int boardX = (boardNum - 1) / 3;
+        int boardY = (boardNum - 1) % 3;
+        int x = (coord - 1) / 3;
+        int y = (coord - 1) % 3;
+        return isValidMove(boardX, boardY, x, y);
+    }
+
+    bool isValidBoard(int boardNum){
+        int boardX = (boardNum - 1) / 3;
+        int boardY = (boardNum - 1) % 3;
+        if(boardX >= 0 && boardX < 3 && boardY >= 0 && boardY < 3 && mat[boardX][boardY].winner == ' '){
+            return true;
+        }
+        cout << RED << "Invalid board" << RESET << endl;
+        return false;
+    }
+
     void startGame(){
 
         // Clear the screen
@@ -263,19 +297,26 @@ struct super{
                     cout << "You can play anywhere!" << endl;
                     cout << "Enter board number between 1-9: ";
                     cin >> boardNum;
-                }while(boardNum < 1 || boardNum > 9);
+                }while(boardNum < 1 || boardNum > 9 || !isValidBoard(boardNum));
             }
 
             do{
                 cout << "Your board is " << boardNum << endl;
                 cout << "Enter Coordination between 1-9: ";
-                cin >> coord;
-            }while(coord < 1 || coord > 9);
+                // cin >> coord;
+                coord = rand() % 9 + 1;
+            }while(coord < 1 || coord > 9 || !isValidMove(boardNum, coord));
 
             cout << "\033[2J\033[1;1H";
 
             play(boardNum, coord);
             print();
+
+            // Check if game ended
+            if(isWinner(currentPlayer) || winner == 'D'){
+                cout << YELLOW << "Player " << currentPlayer << " wins!" << RESET << endl;
+                isGameOver = true;
+            }
 
             currentPlayer = currentPlayer == 'X' ? 'O' : 'X';
             prevMove = coord;
@@ -318,6 +359,7 @@ int main() {
     
     super game;
     game.startGame();
+
 
     return 0;
 }
