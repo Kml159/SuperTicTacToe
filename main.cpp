@@ -13,7 +13,17 @@
 #define BLUE    "\033[34m"      /* Blue */
 #define MAGENTA "\033[35m"      /* Magenta */
 #define CYAN    "\033[36m"      /* Cyan */
+#define BROWN  "\033[33m"      /* Brown */
+#define GRAY    "\033[37m"      /* Gray */
+#define DARKGRAY  "\033[90m"      /* Dark Gray */
+#define LIGHTRED  "\033[91m"      /* Light Red */
+#define LIGHTGREEN  "\033[92m"      /* Light Green */
+#define LIGHTYELLOW  "\033[93m"      /* Light Yellow */
+#define LIGHTBLUE  "\033[94m"      /* Light Blue */
+#define LIGHTMAGENTA  "\033[95m"      /* Light Magenta */
+#define LIGHTCYAN  "\033[96m"      /* Light Cyan */
 #define WHITE   "\033[37m"      /* White */
+
 
 using namespace std;
 
@@ -186,10 +196,6 @@ struct super{
         }
     }
 
-    void chooseRandomPlayer(){
-        currentPlayer = rand() % 2 == 0 ? 'X' : 'O';
-    }
-
     bool isValidMove(int boardX, int boardY, int x, int y){
         return boardX >= 0 && boardX < 3 && boardY >= 0 && boardY < 3 && mat[boardX][boardY].isValidMove(x, y);
     }
@@ -223,6 +229,10 @@ struct super{
                 cout << endl;
             }
         }
+
+        cout << "\n\nSuper Tic-Tac-Toe:\n";
+        cout << MAGENTA << "https://youtube.com/shorts/_Na3a1ZrX7c?si=rmrq-cYfYPUGTMTm" << RESET << endl;
+
     }
 
     bool isValidMove(int boardNum, int coord){
@@ -260,7 +270,7 @@ struct super{
             cout << YELLOW << "Player " << currentPlayer << " wins!" << RESET << endl;
             return true;
         }
-        
+
         else if(winner == 'D'){
             cout << YELLOW << "Draw!" << RESET << endl;
             return true;
@@ -268,22 +278,62 @@ struct super{
         return false;
     }
 
-    void startGame(){
+    int getRandomBoardNum(){
+        int boardNum;
+        do{
+            cout << "You can play anywhere!" << endl;
+            cout << "Enter board number between 1-9: ";
+            // cin >> boardNum;
+            boardNum = rand() % 9 + 1;
+        }while(boardNum < 1 || boardNum > 9 || !isValidBoard(boardNum));
+        return boardNum;
+    }
 
-        // Clear the screen
-        cout << "\033[2J\033[1;1H";
+    int getRandomLocation(int boardNum){
+        int coord;
+        do{
+            cout << "Your board is " << boardNum << endl;
+            cout << "Enter Coordination between 1-9: ";
+            // cin >> coord;
+            coord = rand() % 9 + 1;
+        }while(coord < 1 || coord > 9 || !isValidMove(boardNum, coord));
+        return coord;
+    }
 
-        chooseRandomPlayer();
+    int getBoardInput(){
+        int boardNum;
+        do{
+            cout << "You can play anywhere!" << endl;
+            cout << "Enter board number between 1-9: ";
+            cin >> boardNum;
+            // boardNum = rand() % 9 + 1;
+        }while(boardNum < 1 || boardNum > 9 || !isValidBoard(boardNum));
+        return boardNum;
+    }
+
+    int getLocationInput(int boardNum){
+        int coord;
+        do{
+            cout << "Your board is " << boardNum << endl;
+            cout << "Enter Coordination between 1-9: ";
+            cin >> coord;
+            // coord = rand() % 9 + 1;
+        }while(coord < 1 || coord > 9 || !isValidMove(boardNum, coord));
+        return coord;
+    }
+
+    void startGame_RandomGame(){
+
+        currentPlayer = rand() % 2 == 0 ? 'X' : 'O';    // Randomly select the first player
         int prevMove = -1;
         
         printTemplate();
         cout << "First player is " << currentPlayer << endl;
 
-        // Game loop
-        int boardNum;
         bool isGameOver = false;
         bool isFirst = true;
 
+        // Game loop
         while(!isGameOver){
             int boardNum = prevMove;
             int coord;
@@ -292,33 +342,150 @@ struct super{
             
             // If board is finished then player can play anywhere or if it is the first move
             if(mat[(boardNum-1) / 3][(boardNum-1) % 3].winner != ' ' || isFirst == true){
-                do{
-                    isFirst = false;
-                    cout << "You can play anywhere!" << endl;
-                    cout << "Enter board number between 1-9: ";
-                    cin >> boardNum;
-                }while(boardNum < 1 || boardNum > 9 || !isValidBoard(boardNum));
+                boardNum = getRandomBoardNum();
+                isFirst = false;
             }
 
-            do{
-                cout << "Your board is " << boardNum << endl;
-                cout << "Enter Coordination between 1-9: ";
-                // cin >> coord;
-                coord = rand() % 9 + 1;
-            }while(coord < 1 || coord > 9 || !isValidMove(boardNum, coord));
+            coord = getRandomLocation(boardNum);
 
             cout << "\033[2J\033[1;1H";
 
             play(boardNum, coord);
             print();
 
-            // Check if game ended
             isGameOver = checkGameOver();
-
             currentPlayer = currentPlayer == 'X' ? 'O' : 'X';
             prevMove = coord;
         }
+    }
+
+    void startGame_2player(){
+
+        currentPlayer = rand() % 2 == 0 ? 'X' : 'O';    // Randomly select the first player
+        int prevMove = -1;
+        
+        printTemplate();
+        cout << "First player is " << currentPlayer << endl;
+
+        bool isGameOver = false;
+        bool isFirst = true;
+
+        // Game loop
+        while(!isGameOver){
+            int boardNum = prevMove;
+            int coord;
+
+            cout << "Player " << currentPlayer << " turn" << endl;
             
+            // If board is finished then player can play anywhere or if it is the first move
+            if(mat[(boardNum-1) / 3][(boardNum-1) % 3].winner != ' ' || isFirst == true){
+                boardNum = getBoardInput();
+                isFirst = false;
+            }
+
+            coord = getLocationInput(boardNum);
+
+            cout << "\033[2J\033[1;1H";
+
+            play(boardNum, coord);
+            print();
+
+            isGameOver = checkGameOver();
+            currentPlayer = currentPlayer == 'X' ? 'O' : 'X';
+            prevMove = coord;
+        }
+    }
+
+    void startGame_1player(){ // computer is random
+
+        cout << "\n\n\n";
+
+        char player = 'X';
+        char computer = 'O';
+
+        cout << "Computer is " << computer << endl;
+        cout << "You are " << player << endl;
+
+        currentPlayer = rand() % 2 == 0 ? player : computer;    // Randomly select the first player
+
+        printTemplate();
+        cout << "First player is " << currentPlayer << endl;
+
+        bool isGameOver = false;
+        bool isFirst = true;
+
+        cout << "Enter any key to start...\n";
+        char any;
+        cin >> any;
+
+        // Game loop
+        while(!isGameOver){
+            int boardNum = -1;
+            int coord;
+
+            cout << "Player " << currentPlayer << " turn" << endl;
+            
+            // If board is finished then player can play anywhere or if it is the first move
+            if(currentPlayer == player){
+                if(mat[(boardNum-1) / 3][(boardNum-1) % 3].winner != ' ' || isFirst == true){
+                    boardNum = getBoardInput();
+                    isFirst = false;
+                }
+
+                coord = getLocationInput(boardNum);
+                cout << "\033[2J\033[1;1H";
+            }
+            else{
+                boardNum = getRandomBoardNum();
+                coord = getRandomLocation(boardNum);
+                cout << "\033[2J\033[1;1H";
+                cout << YELLOW << "Computer randomly played " << boardNum << "x" << coord << RESET << endl;
+            }
+
+            play(boardNum, coord);
+            print();
+
+            isGameOver = checkGameOver();
+            currentPlayer = currentPlayer == 'X' ? 'O' : 'X';
+        }
+    }
+
+    void startGame_AI(){
+
+    }
+
+    void startGame(){
+
+        cout << "1. Human vs Human" << endl;
+        cout << "2. Random vs Human" << endl;
+        cout << "3. Random vs Random" << endl;
+        cout << "4. Human vs AI" << endl;
+        cout << "Select player: ";
+        int player;
+        cin >> player;
+
+        switch (player)
+        {
+        case 1:
+            startGame_2player();
+            break;
+        
+        case 2:
+            startGame_1player();
+            break;
+
+        case 3:
+            startGame_RandomGame();
+            break;
+
+        case 4:
+            startGame_AI();
+            break;
+
+        default:
+            cout << RED << "Invalid input" << endl;
+            break;
+        }
     }
 
     bool isWinner(char player){
