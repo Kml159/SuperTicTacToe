@@ -16,12 +16,6 @@
 #define BROWN  "\033[33m"      /* Brown */
 #define GRAY    "\033[37m"      /* Gray */
 #define DARKGRAY  "\033[90m"      /* Dark Gray */
-#define LIGHTRED  "\033[91m"      /* Light Red */
-#define LIGHTGREEN  "\033[92m"      /* Light Green */
-#define LIGHTYELLOW  "\033[93m"      /* Light Yellow */
-#define LIGHTBLUE  "\033[94m"      /* Light Blue */
-#define LIGHTMAGENTA  "\033[95m"      /* Light Magenta */
-#define LIGHTCYAN  "\033[96m"      /* Light Cyan */
 #define WHITE   "\033[37m"      /* White */
 
 
