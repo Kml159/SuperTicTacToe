@@ -399,6 +399,8 @@ struct super{
                     break;
                 
                 default:
+                    cout << RED << "Invalid game mode" << RESET << endl;
+                    exit(1);
                     break;
             }
 
@@ -418,11 +420,13 @@ struct super{
 
     void startGame(){
 
+        cout << "\n\n\n";
+        cout << "Welcome to Super Tic-Tac-Toe!" << endl;
         cout << "1. Human vs Human" << endl;
         cout << "2. Random vs Human" << endl;
         cout << "3. Random vs Random" << endl;
         cout << "4. Human vs AI" << endl;
-        cout << "Select player: ";
+        cout << "Select game mode: ";
         gameModes gameMode;
         int input;
         cin >> input;
