@@ -137,6 +137,13 @@ struct super{
     char currentPlayer;
     char winner;                // 'X' or 'O' or ' ' or 'D' (Draw)
 
+    enum gameModes{
+        HumanVHuman,
+        RandomVHuman,
+        RandomVRandom,
+        HumanVAI
+    };
+
     super(){
         mat = vector<vector<ttt>>(3, vector<ttt>(3));
         winner = ' ';
@@ -316,6 +323,34 @@ struct super{
         return coord;
     }
 
+    pair<int, int> getInput(int prevMove, bool &isFirst){
+        int boardNum = prevMove;
+        int coord;
+
+        // If board is finished then player can play anywhere or if it is the first move
+        if(mat[(boardNum-1) / 3][(boardNum-1) % 3].winner != ' ' || isFirst == true){
+            boardNum = getBoardInput();
+            isFirst = false;
+        }
+
+        coord = getLocationInput(boardNum);
+        return make_pair(boardNum, coord);
+    }
+
+    pair<int, int> getRandomInput(int prevMove, bool &isFirst){
+        int boardNum = prevMove;
+        int coord;
+
+        // If board is finished then player can play anywhere or if it is the first move
+        if(mat[(boardNum-1) / 3][(boardNum-1) % 3].winner != ' ' || isFirst == true){
+            boardNum = getRandomBoardNum();
+            isFirst = false;
+        }
+
+        coord = getRandomLocation(boardNum);
+        return make_pair(boardNum, coord);
+    }
+
     void startGame_RandomGame(){
 
         currentPlayer = rand() % 2 == 0 ? 'X' : 'O';    // Randomly select the first player
@@ -366,20 +401,13 @@ struct super{
 
         // Game loop
         while(!isGameOver){
-            int boardNum = prevMove;
-            int coord;
 
-            cout << "Player " << currentPlayer << " turn" << endl;
-            
-            // If board is finished then player can play anywhere or if it is the first move
-            if(mat[(boardNum-1) / 3][(boardNum-1) % 3].winner != ' ' || isFirst == true){
-                boardNum = getBoardInput();
-                isFirst = false;
-            }
-
-            coord = getLocationInput(boardNum);
+            auto input = getInput(prevMove, isFirst);
+            int boardNum = input.first;
+            int coord = input.second;
 
             cout << "\033[2J\033[1;1H";
+            cout << YELLOW <<"Player " << currentPlayer << " turn" << RESET <<  endl;
 
             play(boardNum, coord);
             print();
@@ -396,25 +424,27 @@ struct super{
 
         char player = 'X';
         char computer = 'O';
-
-        cout << "Computer is " << computer << endl;
-        cout << "You are " << player << endl;
+        int prevMove = -1;
 
         currentPlayer = rand() % 2 == 0 ? player : computer;    // Randomly select the first player
 
         printTemplate();
+        cout << "Computer is " << RED << computer << RESET << endl;
+        cout << "You are " << GREEN << player << RESET << endl;
         cout << "First player is " << currentPlayer << endl;
 
         bool isGameOver = false;
         bool isFirst = true;
 
-        cout << "Enter any key to start...\n";
-        char any;
-        cin >> any;
+        {
+            cout << "Enter any key to start...\n";
+            char any;
+            cin >> any;
+        }
 
         // Game loop
         while(!isGameOver){
-            int boardNum = -1;
+            int boardNum = prevMove;
             int coord;
 
             cout << "Player " << currentPlayer << " turn" << endl;
@@ -430,7 +460,10 @@ struct super{
                 cout << "\033[2J\033[1;1H";
             }
             else{
-                boardNum = getRandomBoardNum();
+                if(mat[(boardNum-1) / 3][(boardNum-1) % 3].winner != ' ' || isFirst == true){
+                    boardNum = getRandomBoardNum();
+                    isFirst = false;
+                }
                 coord = getRandomLocation(boardNum);
                 cout << "\033[2J\033[1;1H";
                 cout << YELLOW << "Computer randomly played " << boardNum << "x" << coord << RESET << endl;
@@ -441,12 +474,127 @@ struct super{
 
             isGameOver = checkGameOver();
             currentPlayer = currentPlayer == 'X' ? 'O' : 'X';
+            prevMove = coord;
         }
     }
 
+
     void startGame_AI(){
 
+        cout << "\n\n\n";
+        char player = 'X';
+        char computer = 'O';
+        int prevMove = -1;
+
+        currentPlayer = rand() % 2 == 0 ? player : computer;    // Randomly select the first player
+
+        printTemplate();
+        cout << "Computer is " << RED << computer << RESET << endl;
+        cout << "You are " << GREEN << player << RESET << endl;
+
+        bool isGameOver = false;
+        bool isFirst = true;
+
+        {
+            cout << "Enter any key to start...\n";
+            char any;
+            cin >> any;
+        }
+
+        // Game loop
+        while(!isGameOver){
+            
+            cout << "Player " << currentPlayer << " turn" << endl;
+
+            pair<int, int> input;
+            if(currentPlayer == player){
+                input = getInput(prevMove, isFirst);
+            }
+            else{
+                input = getRandomInput(prevMove, isFirst);
+            }
+
+            int boardNum = input.first;
+            int coord = input.second;
+
+            cout << "\033[2J\033[1;1H";
+            cout << YELLOW <<"Player " << currentPlayer << " turn" << RESET <<  endl;
+
+            play(boardNum, coord);
+            print();
+
+            isGameOver = checkGameOver();
+            currentPlayer = currentPlayer == 'X' ? 'O' : 'X';
+            prevMove = coord;
+        }
     }
+
+    void startGame(gameModes gameMode){
+
+        cout << "\n\n\n";
+        char playerA = 'X';
+        char playerB = 'O';
+        int prevMove = -1;
+
+        currentPlayer = rand() % 2 == 0 ? playerA : playerB;    // Randomly select the first player
+
+        printTemplate();
+
+        bool isGameOver = false;
+        bool isFirst = true;
+
+        {
+            cout << "Enter any key to start...\n";
+            char any;
+            cin >> any;
+        }
+
+        // Game loop
+        while(!isGameOver){
+            
+            cout << YELLOW << "Player " << currentPlayer << " turn" << RESET << endl;
+
+            pair<int, int> input;
+
+            switch (gameMode){
+
+                case HumanVHuman:
+                    input = getInput(prevMove, isFirst);
+                    break;
+                
+                case RandomVHuman:
+                    if(currentPlayer == playerA){input = getInput(prevMove, isFirst);}
+                    else{input = getRandomInput(prevMove, isFirst);}
+                    break;
+
+                case RandomVRandom:
+                    input = getRandomInput(prevMove, isFirst);
+                    break;
+
+                case HumanVAI:
+                    if(currentPlayer == playerA){input = getInput(prevMove, isFirst);}
+                    else{input = getRandomInput(prevMove, isFirst);}
+                    break;
+                
+                default:
+                    break;
+            }
+
+            int boardNum = input.first;
+            int coord = input.second;
+
+            cout << "\033[2J\033[1;1H";
+            cout << YELLOW << "Player " << currentPlayer << " played " << boardNum << "x" << coord << RESET <<  endl;
+            play(boardNum, coord);
+            print();
+
+            isGameOver = checkGameOver();
+            currentPlayer = currentPlayer == 'X' ? 'O' : 'X';
+            prevMove = coord;
+        }
+    }
+
+
 
     void startGame(){
 
@@ -455,31 +603,12 @@ struct super{
         cout << "3. Random vs Random" << endl;
         cout << "4. Human vs AI" << endl;
         cout << "Select player: ";
-        int player;
-        cin >> player;
+        gameModes gameMode;
+        int input;
+        cin >> input;
+        gameMode = (gameModes)(--input);
 
-        switch (player)
-        {
-        case 1:
-            startGame_2player();
-            break;
-        
-        case 2:
-            startGame_1player();
-            break;
-
-        case 3:
-            startGame_RandomGame();
-            break;
-
-        case 4:
-            startGame_AI();
-            break;
-
-        default:
-            cout << RED << "Invalid input" << endl;
-            break;
-        }
+        startGame(gameMode);
     }
 
     bool isWinner(char player){
