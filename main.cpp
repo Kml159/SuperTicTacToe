@@ -348,6 +348,32 @@ struct super{
         return make_pair(boardNum, coord);
     }
 
+    void minimax(vector<vector<ttt>> game, int prevMove, char player = '0'){
+        int boardNum = prevMove;
+        int coord;
+        if(mat[(boardNum-1) / 3][(boardNum-1) % 3].winner != ' '){
+            
+            // SELECT BOARD NUMBER
+
+        }
+    }
+
+    inline pair<int, int> getAIInput(int prevMove, bool &isFirst){
+        int boardNum = prevMove;
+        int coord;
+
+        // First move
+        if(isFirst){
+            isFirst = false;
+            return make_pair(5, 5);
+        }
+        
+        isFirst = false;
+
+        coord;
+        return make_pair(boardNum, coord);
+    }
+
     inline void startGame(gameModes gameMode){
 
         cout << "\n\n\n";
