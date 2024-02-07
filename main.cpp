@@ -3,7 +3,7 @@
 #include <ctime>
 #include <random>
 #include <iomanip>
-
+#include <unistd.h>
 
 // Define colors
 #define RESET   "\033[0m"
@@ -391,6 +391,7 @@ struct super{
 
                 case RandomVRandom:
                     input = getRandomInput(prevMove, isFirst);
+                    usleep(200000);
                     break;
 
                 case HumanVAI:
@@ -425,7 +426,7 @@ struct super{
         cout << "1. Human vs Human" << endl;
         cout << "2. Random vs Human" << endl;
         cout << "3. Random vs Random" << endl;
-        cout << "4. Human vs AI" << endl;
+        // cout << "4. Human vs AI" << endl;
         cout << "Select game mode: ";
         gameModes gameMode;
         int input;
@@ -466,7 +467,6 @@ int main() {
     
     super game;
     game.startGame();
-
 
     return 0;
 }
