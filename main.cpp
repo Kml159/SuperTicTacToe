@@ -21,7 +21,6 @@
 
 using namespace std;
 
-// Tic Tac Toe Game
 
 struct ttt{
 
