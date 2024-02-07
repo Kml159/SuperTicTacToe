@@ -18,9 +18,7 @@
 #define DARKGRAY  "\033[90m"      /* Dark Gray */
 #define WHITE   "\033[37m"      /* White */
 
-
 using namespace std;
-
 
 struct ttt{
 
@@ -164,7 +162,7 @@ struct super{
             |7|8|9| |7|8|9| |7|8|9|
     */
 
-    void print(){
+    inline void print(){
         cout << endl << endl;
         for(int i = 0; i < 3; i++){
             for(int j = 0; j < 3; j++){
@@ -196,11 +194,11 @@ struct super{
         }
     }
 
-    bool isValidMove(int boardX, int boardY, int x, int y){
+    inline bool isValidMove(int boardX, int boardY, int x, int y){
         return boardX >= 0 && boardX < 3 && boardY >= 0 && boardY < 3 && mat[boardX][boardY].isValidMove(x, y);
     }
 
-    void play(int boardNum, int coord){
+    inline void play(int boardNum, int coord){
         int boardX = (boardNum - 1) / 3;
         int boardY = (boardNum - 1) % 3;
         int x = (coord - 1) / 3;
@@ -209,7 +207,7 @@ struct super{
         else{cout << RED << "Invalid move" << RESET << endl;}
     }
 
-    void printTemplate() {
+    inline void printTemplate() {
         int size = 3;
         for (int row = 0; row < size; ++row) {
             for (int block = 0; block < 3; ++block) {
@@ -235,7 +233,7 @@ struct super{
 
     }
 
-    bool isValidMove(int boardNum, int coord){
+    inline bool isValidMove(int boardNum, int coord){
         int boardX = (boardNum - 1) / 3;
         int boardY = (boardNum - 1) % 3;
         int x = (coord - 1) / 3;
@@ -243,7 +241,7 @@ struct super{
         return isValidMove(boardX, boardY, x, y);
     }
 
-    bool isValidBoard(int boardNum){
+    inline bool isValidBoard(int boardNum){
         int boardX = (boardNum - 1) / 3;
         int boardY = (boardNum - 1) % 3;
         if(boardX >= 0 && boardX < 3 && boardY >= 0 && boardY < 3 && mat[boardX][boardY].winner == ' '){
@@ -253,7 +251,7 @@ struct super{
         return false;
     }
 
-    bool checkGameOver(){
+    inline bool checkGameOver(){
         uint8_t gamesDone = 0;
         for(int i = 0; i < 3; i++){
             for(int j = 0; j < 3; j++){
@@ -278,7 +276,7 @@ struct super{
         return false;
     }
 
-    int getRandomBoardNum(){
+    inline int getRandomBoardNum(){
         int boardNum;
         do{
             cout << "You can play anywhere!" << endl;
@@ -289,7 +287,7 @@ struct super{
         return boardNum;
     }
 
-    int getRandomLocation(int boardNum){
+    inline int getRandomLocation(int boardNum){
         int coord;
         do{
             cout << "Your board is " << boardNum << endl;
@@ -300,7 +298,7 @@ struct super{
         return coord;
     }
 
-    int getBoardInput(){
+    inline int getBoardInput(){
         int boardNum;
         do{
             cout << "You can play anywhere!" << endl;
@@ -311,7 +309,7 @@ struct super{
         return boardNum;
     }
 
-    int getLocationInput(int boardNum){
+    inline int getLocationInput(int boardNum){
         int coord;
         do{
             cout << "Your board is " << boardNum << endl;
@@ -322,7 +320,7 @@ struct super{
         return coord;
     }
 
-    pair<int, int> getInput(int prevMove, bool &isFirst){
+    inline pair<int, int> getInput(int prevMove, bool &isFirst){
         int boardNum = prevMove;
         int coord;
 
@@ -336,7 +334,7 @@ struct super{
         return make_pair(boardNum, coord);
     }
 
-    pair<int, int> getRandomInput(int prevMove, bool &isFirst){
+    inline pair<int, int> getRandomInput(int prevMove, bool &isFirst){
         int boardNum = prevMove;
         int coord;
 
@@ -350,7 +348,7 @@ struct super{
         return make_pair(boardNum, coord);
     }
 
-    void startGame(gameModes gameMode){
+    inline void startGame(gameModes gameMode){
 
         cout << "\n\n\n";
         char playerA = 'X';
@@ -418,7 +416,7 @@ struct super{
         }
     }
 
-    void startGame(){
+    inline void startGame(){
 
         cout << "\n\n\n";
         cout << "Welcome to Super Tic-Tac-Toe!" << endl;
@@ -435,7 +433,7 @@ struct super{
         startGame(gameMode);
     }
 
-    bool isWinner(char player){
+    inline bool isWinner(char player){
         // check if there is a winner and set the winner
         for(int i = 0; i < 3; i++){
             if(mat[i][0].winner == player && mat[i][1].winner == player && mat[i][2].winner == player){
