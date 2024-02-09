@@ -134,6 +134,14 @@ struct super{
     char currentPlayer;
     char winner;                // 'X' or 'O' or ' ' or 'D' (Draw)
 
+    struct gameState{
+        vector<vector<ttt>> game;
+        int boardNum;           // Prev moves
+        static char player;
+        char currentPlayer;
+        int score;
+    };
+    
     enum gameModes{
         HumanVHuman,
         RandomVHuman,
@@ -241,13 +249,13 @@ struct super{
         return isValidMove(boardX, boardY, x, y);
     }
 
-    inline bool isValidBoard(int boardNum){
+    inline bool isValidBoard(int boardNum, char output = 'Y'){
         int boardX = (boardNum - 1) / 3;
         int boardY = (boardNum - 1) % 3;
         if(boardX >= 0 && boardX < 3 && boardY >= 0 && boardY < 3 && mat[boardX][boardY].winner == ' '){
             return true;
         }
-        cout << RED << "Invalid board" << RESET << endl;
+        if(output == 'Y'){cout << RED << "Invalid board" << RESET << endl;}
         return false;
     }
 
@@ -348,17 +356,28 @@ struct super{
         return make_pair(boardNum, coord);
     }
 
-    void minimax(vector<vector<ttt>> game, int prevMove, char player = '0'){
-        int boardNum = prevMove;
-        int coord;
-        if(mat[(boardNum-1) / 3][(boardNum-1) % 3].winner != ' '){
-            
-            // SELECT BOARD NUMBER
+    void minimax(gameState game){
 
+        // If current board is unplable then choose any board
+        if(game.game[(game.boardNum-1) / 3][(game.boardNum-1) % 3].winner != ' '){
+            for(int i=1; i < 10; i++){
+                if(isValidBoard(i, 'N')){    //
+                    gameState newGame = game;
+                    newGame.boardNum = i;
+                    minimax(newGame);
+                }
+            }
         }
+
+        // If current board is playable then choose any location
+        for(int i=1; i < 10; i++){
+            // Try every possible move and evaluate the score
+        }
+        
+        
     }
 
-    inline pair<int, int> getAIInput(int prevMove, bool &isFirst){
+    inline pair<int, int> getAIInput(int prevMove, bool &isFirst, char AI = '0'){
         int boardNum = prevMove;
         int coord;
 
@@ -370,7 +389,16 @@ struct super{
         
         isFirst = false;
 
-        coord;
+        // Call minimax function to search for the best move
+        gameState game;
+        game.game = mat;
+        game.currentPlayer = this->currentPlayer;
+        game.score = 0;
+        game.boardNum = prevMove;
+        game.player = AI;
+
+        minimax(game);
+
         return make_pair(boardNum, coord);
     }
 
