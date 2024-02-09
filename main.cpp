@@ -53,7 +53,7 @@ struct ttt{
 
     bool isValidMove(int x, int y){
         if(x < 0 || x > 2 || y < 0 || y > 2 || mat[x][y] != ' '){
-            cout << RED << "Invalid move" << RESET << endl;
+            // cout << RED << "Invalid move" << RESET << endl;
             return false;
         }
         return true;
@@ -94,7 +94,7 @@ struct ttt{
         return false;
     }
 
-    void play(int coord, char player){
+    void play(int coord, char player, char output = 'Y'){
         int x = (coord - 1) / 3;
         int y = (coord - 1) % 3;
         if(isValidMove(x, y)){
@@ -102,7 +102,9 @@ struct ttt{
             movesPlayed++;
             if(isWinner(player)){winner = player;}
         }
-        else{cout << RED << "Invalid move" << RESET << endl;}
+        else{
+            if(output == 'Y'){cout << RED << "Invalid move" << RESET << endl;}
+        }
     }
 
     void startGame(char starter){
@@ -126,6 +128,7 @@ struct ttt{
         }
     }
 
+    bool isValidBoard(){return winner == ' ';}
 };
 
 struct super{
@@ -137,9 +140,121 @@ struct super{
     struct gameState{
         vector<vector<ttt>> game;
         int boardNum;           // Prev moves
-        static char player;
+        static char computer;
         char currentPlayer;
-        int score;
+        int score = 0;
+        bool isGameOver = false;
+
+        static const int WON = 100;
+        static const int LOST = -100;
+        static const int DRAW = 0;
+
+        static const int WON_SMALL = 1;
+        static const int LOST_SMALL = -1;
+
+        static unordered_map<string, int> scores; // Board number -> score
+        /*
+            Scores HashMap:
+
+            0-X0X00X0X0-X0X00X0X0-X0X00X0X0-X0X00X0X0-X0X00X0X0-X0X00X0X0-X0X00X0X0-X0X00X0X0-X0X00X0X0     ->     0
+            ^Current_player       ^BoardX                                                                          ^Score
+
+            X-X0X00X0X0-X0X00X0X0-X0X0?0X0-X0X00X0X0-?????????-X0X00?0X0-X0X0??0X0-X0X00X0X0-??X00X0X0     ->     0
+
+        */
+
+        void put2Hash(int score){
+            string key = "";
+            key += currentPlayer;
+            for(int i = 0; i < 3; i++){
+                for(int j = 0; j < 3; j++){
+                    for(int k = 0; k < 3; k++){
+                        for(int l = 0; l < 3; l++){
+                            key += game[i][j].mat[k][l];
+                        }
+                    }
+                }
+            }
+
+            scores[key] = score;
+        }
+
+        int calculateScore(){
+
+            char enemy = computer == 'X' ? 'O' : 'X';
+            
+            // if computer wins then score is infinity
+            for(int i = 0; i < 3; i++){
+                if(game[i][0].winner == computer && game[i][1].winner == computer && game[i][2].winner == computer){
+                    score = WON;
+                    isGameOver = true;
+                    return score;
+                }
+                if(game[0][i].winner == computer && game[1][i].winner == computer && game[2][i].winner == computer){
+                    score = WON;
+                    isGameOver = true;
+                    return score;
+                }
+            }
+
+            if(game[0][0].winner == computer && game[1][1].winner == computer && game[2][2].winner == computer){
+                score = WON;
+                isGameOver = true;
+                return score;
+            }
+
+            if(game[0][2].winner == computer && game[1][1].winner == computer && game[2][0].winner == computer){
+                score = WON;
+                isGameOver = true;
+                return score;
+            }
+
+            // if player wins then score is -infinity
+            for(int i = 0; i < 3; i++){
+                if(game[i][0].winner == enemy && game[i][1].winner == enemy && game[i][2].winner == enemy){
+                    score = -LOST;
+                    isGameOver = true;
+                    return score;
+                }
+                if(game[0][i].winner == enemy && game[1][i].winner == enemy && game[2][i].winner == enemy){
+                    score = -LOST;
+                    isGameOver = true;
+                    return score;
+                }
+            }
+
+            if(game[0][0].winner == enemy && game[1][1].winner == enemy && game[2][2].winner == enemy){
+                score = -LOST;
+                isGameOver = true;
+                return score;
+            }
+
+            if(game[0][2].winner == enemy && game[1][1].winner == enemy && game[2][0].winner == enemy){
+                score = -LOST;
+                isGameOver = true;
+                return score;
+            }
+
+            // Else calculate the score based on smaller boards
+            for(int i = 0; i < 3; i++){
+                for(int j = 0; j < 3; j++){
+                    if(game[i][j].winner == computer){  // Computer wins
+                        score += WON_SMALL;
+                    }
+                    else if(game[i][j].winner == enemy){  // Player wins
+                        score += LOST_SMALL;
+                    }
+                }
+            }
+
+            // if there is a draw then score is 0
+            if(game[0][0].winner != ' ' && game[0][1].winner != ' ' && game[0][2].winner != ' ' && game[1][0].winner != ' ' && game[1][1].winner != ' ' && game[1][2].winner != ' ' && game[2][0].winner != ' ' && game[2][1].winner != ' ' && game[2][2].winner != ' '){
+                score = DRAW;
+                isGameOver = true;
+                return score;
+            }
+
+        }
     };
     
     enum gameModes{
@@ -241,12 +356,14 @@ struct super{
 
     }
 
-    inline bool isValidMove(int boardNum, int coord){
+    inline bool isValidMove(int boardNum, int coord, char output = 'Y'){
         int boardX = (boardNum - 1) / 3;
         int boardY = (boardNum - 1) % 3;
         int x = (coord - 1) / 3;
         int y = (coord - 1) % 3;
-        return isValidMove(boardX, boardY, x, y);
+        bool isValid = isValidMove(boardX, boardY, x, y);
+        if(!isValid && output == 'Y' ){cout << RED << "Invalid move" << RESET << endl;}
+        return isValid;
     }
 
     inline bool isValidBoard(int boardNum, char output = 'Y'){
@@ -291,18 +408,18 @@ struct super{
             cout << "Enter board number between 1-9: ";
             // cin >> boardNum;
             boardNum = rand() % 9 + 1;
-        }while(boardNum < 1 || boardNum > 9 || !isValidBoard(boardNum));
+        }while(boardNum < 1 || boardNum > 9 || !isValidBoard(boardNum, 'N'));
         return boardNum;
     }
 
     inline int getRandomLocation(int boardNum){
         int coord;
         do{
-            cout << "Your board is " << boardNum << endl;
-            cout << "Enter Coordination between 1-9: ";
+            // cout << "Your board is " << boardNum << endl;
+            // cout << "Enter Coordination between 1-9: ";
             // cin >> coord;
             coord = rand() % 9 + 1;
-        }while(coord < 1 || coord > 9 || !isValidMove(boardNum, coord));
+        }while(coord < 1 || coord > 9 || !isValidMove(boardNum, coord, 'N'));
         return coord;
     }
 
@@ -356,7 +473,27 @@ struct super{
         return make_pair(boardNum, coord);
     }
 
-    void minimax(gameState game){
+    /*
+
+    pair<int, int> minimax(gameState game, bool first = false){   
+
+        
+        // This function implements the minimax algorithm to determine the best move for the computer player in a game.
+        // It recursively evaluates all possible moves and returns the optimal move for the computer player.
+        // 
+        // @todo This algorithm re-evaluates the same board multiple times. It would be more efficient to store the results of the evaluations in a hash table.
+        // @param game The current state of the game.
+        // @param first A flag indicating whether it is the first level of recursion.
+        // @return The best move for the computer player.
+         
+    
+        // If current board is finished then return
+        int boardR = (game.boardNum - 1) / 3;
+        int boardC = (game.boardNum - 1) % 3;
+        game.calculateScore();
+        if(game.isGameOver){
+            return ???;
+        }
 
         // If current board is unplable then choose any board
         if(game.game[(game.boardNum-1) / 3][(game.boardNum-1) % 3].winner != ' '){
@@ -364,19 +501,40 @@ struct super{
                 if(isValidBoard(i, 'N')){    //
                     gameState newGame = game;
                     newGame.boardNum = i;
-                    minimax(newGame);
+                    game.score += minimax(newGame);
                 }
             }
         }
 
         // If current board is playable then choose any location
+        int bestMove = -1;
+        int bestScore = -1;
         for(int i=1; i < 10; i++){
-            // Try every possible move and evaluate the score
+            if(isValidMove(game.boardNum, i)){
+                int boardR = (game.boardNum - 1) / 3;
+                int boardC = (game.boardNum - 1) % 3;
+                gameState newGame = game;
+                newGame.game.at(boardR).at(boardC).play(i, game.computer);
+                newGame.boardNum = i;
+                int score_depth = minimax(newGame);
+                game.score += score_depth;
+
+                if(first){
+                    if(score_depth > bestScore){
+                        bestScore = score_depth;
+                        bestMove = i;
+                    }
+                }
+            }
         }
-        
-        
+
+        if(first){
+            return bestMove;
+        }
     }
 
+
+    */
     inline pair<int, int> getAIInput(int prevMove, bool &isFirst, char AI = '0'){
         int boardNum = prevMove;
         int coord;
@@ -395,9 +553,9 @@ struct super{
         game.currentPlayer = this->currentPlayer;
         game.score = 0;
         game.boardNum = prevMove;
-        game.player = AI;
+        game.computer = AI;
 
-        minimax(game);
+        // minimax(game, true); - NOT IMPLEMENTED YET !!!
 
         return make_pair(boardNum, coord);
     }
